@@ -120,6 +120,19 @@ async def get_dummy() -> DummyResponse:
     )
 
 
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
+
+# Serve static files from React build
+app.mount("/static", StaticFiles(directory="build/static"), name="static")
+
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    index_path = os.path.join("build", "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"detail": "Not Found"}
+
 def main(argv=sys.argv[1:]):
     try:
         uvicorn.run("server:app", host="0.0.0.0", port=3001, reload=DEBUG)
